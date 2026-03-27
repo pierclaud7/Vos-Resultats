@@ -1,139 +1,95 @@
 <template>
-  <div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold mb-0">
-          <i class="fas fa-file-csv me-2 text-success"></i> Import CSV
-        </h1>
-        <p class="text-muted small mb-0">Importer une liste d'étudiants depuis un fichier CSV</p>
+  <div class="page">
+    <div class="topbar">
+      <h1 class="page-title">Import CSV</h1>
+      <router-link to="/admin/etudiants" class="btn-secondary" style="text-decoration:none;display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Retour
+      </router-link>
+    </div>
+
+    <div class="grid-2">
+      <!-- Format attendu -->
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Format attendu
+        </div>
+        <p class="info-text">Fichier <code>.csv</code> avec séparateur <code>;</code> ou <code>,</code><br>La première ligne doit être l'en-tête.</p>
+        <pre class="code-block">nom;prenom;email;date_naissance
+DUPONT;Marie;marie@exemple.com;2001-03-15
+MARTIN;Thomas;thomas@exemple.com;2000-07-22</pre>
+        <p class="info-text" style="margin-top:12px">
+          <strong>Obligatoires :</strong> nom, prenom, email<br>
+          <strong>Optionnel :</strong> date_naissance (YYYY-MM-DD)<br>
+          Le <strong>numéro étudiant</strong> est généré automatiquement.
+        </p>
+        <button class="download-btn" @click="downloadTemplate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Télécharger le modèle CSV
+        </button>
       </div>
-      <a :href="`/api/import/csv/template`" class="btn btn-outline-secondary btn-sm" download>
-        <i class="fas fa-download me-1"></i> Télécharger le modèle CSV
-      </a>
-    </div>
 
-    <!-- Alertes -->
-    <div v-if="result" class="alert mb-4" :class="result.created > 0 ? 'alert-success' : 'alert-warning'">
-      <i class="fas fa-check-circle me-2"></i>
-      <strong>{{ result.message }}</strong>
-      <ul v-if="result.errors.length > 0" class="mt-2 mb-0 small">
-        <li v-for="err in result.errors" :key="err">{{ err }}</li>
-      </ul>
-    </div>
+      <!-- Formulaire -->
+      <div class="form-card">
+        <div class="info-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importer un fichier
+        </div>
 
-    <div v-if="errorMsg" class="alert alert-danger mb-4">
-      <i class="fas fa-exclamation-circle me-2"></i> {{ errorMsg }}
-    </div>
+        <div class="form-field">
+          <label class="field-label">Session d'examen *</label>
+          <select v-model="sessionId" class="select-field" :disabled="importing">
+            <option value="">— Choisir une session —</option>
+            <option v-for="s in sessions" :key="s.id" :value="s.id">{{ s.diplome?.intitule }} — {{ s.annee }}</option>
+          </select>
+        </div>
 
-    <div class="row">
-      <!-- Formulaire import -->
-      <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white fw-bold">
-            <i class="fas fa-upload text-primary me-2"></i> Importer des étudiants
-          </div>
-          <div class="card-body">
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Session d'examen *</label>
-              <select v-model="selectedSession" class="form-select">
-                <option value="">-- Choisir une session --</option>
-                <optgroup
-                  v-for="filiere in sessionsGroupees"
-                  :key="filiere.nom"
-                  :label="filiere.nom"
-                >
-                  <option v-for="s in filiere.sessions" :key="s.id" :value="s.id">
-                    {{ s.diplome }} — {{ s.annee }}
-                  </option>
-                </optgroup>
-              </select>
+        <div class="form-field">
+          <label class="field-label">Fichier CSV *</label>
+          <div class="file-zone" :class="{ 'has-file': selectedFile }" @click="$refs.fileInput.click()">
+            <input ref="fileInput" type="file" accept=".csv" style="display:none" @change="onFileChange" :disabled="importing" />
+            <div v-if="!selectedFile">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px;color:#94A3B8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div style="font-size:13.5px;color:#64748B;font-weight:600">Cliquer pour sélectionner</div>
+              <div style="font-size:12px;color:#94A3B8;margin-top:4px">Fichier .csv uniquement</div>
             </div>
-
-            <div class="mb-4">
-              <label class="form-label fw-semibold">Fichier CSV *</label>
-              <input
-                ref="fileInput"
-                type="file"
-                accept=".csv,.txt"
-                class="form-control"
-                @change="onFileChange"
-              />
-              <div class="form-text">Formats acceptés : .csv — Séparateur : virgule ou point-virgule</div>
-            </div>
-
-            <!-- Aperçu du fichier -->
-            <div v-if="preview.length > 0" class="mb-4">
-              <label class="form-label fw-semibold small text-muted">Aperçu (5 premières lignes)</label>
-              <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                <table class="table table-sm table-bordered mb-0 small">
-                  <thead class="table-light">
-                    <tr><th v-for="h in preview[0]" :key="h">{{ h }}</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(row, i) in preview.slice(1)" :key="i">
-                      <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div v-else style="display:flex;align-items:center;gap:10px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:#059669">{{ selectedFile.name }}</div>
+                <div style="font-size:12px;color:#94A3B8">{{ fileSize }}</div>
               </div>
             </div>
-
-            <button
-              class="btn btn-success w-100 fw-bold"
-              @click="importer"
-              :disabled="!selectedSession || !csvFile || uploading"
-            >
-              <span v-if="uploading">
-                <span class="spinner-border spinner-border-sm me-2"></span> Import en cours...
-              </span>
-              <span v-else>
-                <i class="fas fa-file-import me-2"></i> Lancer l'import
-              </span>
-            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Format attendu -->
-      <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white fw-bold">
-            <i class="fas fa-info-circle text-info me-2"></i> Format du fichier CSV
+        <button class="import-btn" @click="doImport" :disabled="!sessionId || !selectedFile || importing">
+          <span v-if="importing" class="spinner-xs white"></span>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          {{ importing ? 'Import en cours...' : 'Lancer l\'import' }}
+        </button>
+
+        <!-- Résultat import -->
+        <div v-if="result" style="margin-top:20px">
+          <div class="result-success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ result.imported }} étudiant(s) importé(s) avec succès
           </div>
-          <div class="card-body">
-            <p class="text-muted small mb-3">La première ligne doit contenir les en-têtes suivants :</p>
-
-            <div class="table-responsive mb-4">
-              <table class="table table-sm table-bordered small">
-                <thead class="table-light">
-                  <tr>
-                    <th>Colonne</th>
-                    <th>Obligatoire</th>
-                    <th>Exemple</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="col in colonnes" :key="col.nom">
-                    <td><code>{{ col.nom }}</code></td>
-                    <td>
-                      <span class="badge" :class="col.requis ? 'bg-danger' : 'bg-secondary'">
-                        {{ col.requis ? 'Oui' : 'Non' }}
-                      </span>
-                    </td>
-                    <td class="text-muted">{{ col.exemple }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <p class="fw-semibold small mb-2">Exemple complet :</p>
-            <pre class="bg-light rounded p-3 small mb-0" style="font-size: 0.75rem;">nom,prenom,email,dateNaissance,numeroEtudiant,moyenne,estAdmis
-DUPONT,Jean,jean@ecole.fr,2001-03-15,ETU-2025-00001,14.5,1
-MARTIN,Marie,marie@ecole.fr,2000-07-22,,12,1
-DURAND,Paul,paul@ecole.fr,,,8.5,0
-BERNARD,Emma,emma@ecole.fr,,,,</pre>
+          <div v-if="result.errors?.length" class="result-warnings">
+            <div style="font-weight:600;margin-bottom:6px">{{ result.errors.length }} ligne(s) ignorée(s) :</div>
+            <ul style="margin:0;padding-left:16px">
+              <li v-for="e in result.errors" :key="e" style="font-size:12px;margin-bottom:4px">{{ e }}</li>
+            </ul>
           </div>
+          <router-link v-if="result.imported > 0" to="/admin/etudiants" class="goto-btn">
+            Voir les étudiants importés →
+          </router-link>
+        </div>
+
+        <div v-if="error" class="result-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ error }}
         </div>
       </div>
     </div>
@@ -141,93 +97,75 @@ BERNARD,Emma,emma@ecole.fr,,,,</pre>
 </template>
 
 <script setup>
+import '@/assets/admin.css'
 import { ref, computed, onMounted } from 'vue'
-import { sessionService } from '@/services/index.js'
-import api from '@/services/api.js'
+import { sessionService, etudiantService } from '@/services/index.js'
 
-const sessions        = ref([])
-const selectedSession = ref('')
-const csvFile         = ref(null)
-const preview         = ref([])
-const uploading       = ref(false)
-const result          = ref(null)
-const errorMsg        = ref('')
-const fileInput       = ref(null)
+const sessions = ref([]); const sessionId = ref(''); const selectedFile = ref(null)
+const importing = ref(false); const result = ref(null); const error = ref(''); const fileInput = ref(null)
 
-const colonnes = [
-  { nom: 'nom',            requis: true,  exemple: 'DUPONT' },
-  { nom: 'prenom',         requis: true,  exemple: 'Jean' },
-  { nom: 'email',          requis: true,  exemple: 'jean.dupont@ecole.fr' },
-  { nom: 'dateNaissance',  requis: false, exemple: '2001-03-15' },
-  { nom: 'numeroEtudiant', requis: false, exemple: 'ETU-2025-00001 (auto si vide)' },
-  { nom: 'moyenne',        requis: false, exemple: '14.5' },
-  { nom: 'estAdmis',       requis: false, exemple: '1 (oui) ou 0 (non)' },
-]
+const fileSize = computed(() => selectedFile.value ? `${(selectedFile.value.size / 1024).toFixed(1)} KB` : '')
 
-// Grouper les sessions par filière pour l'affichage
-const sessionsGroupees = computed(() => {
-  const map = {}
-  for (const s of sessions.value) {
-    const filiere = s.diplome?.filiere?.nom || 'Autres'
-    if (!map[filiere]) map[filiere] = { nom: filiere, sessions: [] }
-    map[filiere].sessions.push({
-      id:     s.id,
-      diplome: s.diplome?.intitule,
-      annee:  s.annee,
-    })
-  }
-  return Object.values(map)
-})
+onMounted(async () => { sessions.value = (await sessionService.getAll()).data })
 
-function onFileChange(event) {
-  csvFile.value = event.target.files[0] || null
-  preview.value = []
-  result.value  = null
-  errorMsg.value = ''
+function onFileChange(e) { selectedFile.value = e.target.files[0] || null; result.value = null; error.value = '' }
 
-  if (!csvFile.value) return
-
-  // Générer un aperçu côté client
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const text    = e.target.result
-    const sep     = text.indexOf(';') > text.indexOf(',') ? ';' : ','
-    const lines   = text.trim().split('\n').slice(0, 6)
-    preview.value = lines.map(l => l.split(sep).map(c => c.trim().replace(/^"|"$/g, '')))
-  }
-  reader.readAsText(csvFile.value)
-}
-
-async function importer() {
-  result.value  = null
-  errorMsg.value = ''
-  uploading.value = true
-
+async function doImport() {
+  importing.value = true; result.value = null; error.value = ''
   try {
-    const formData = new FormData()
-    formData.append('csv', csvFile.value)
-
-    const res = await api.post(`/import/csv/${selectedSession.value}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-
-    result.value = res.data
-
-    // Réinitialiser le formulaire après succès
-    if (res.data.created > 0) {
-      csvFile.value      = null
-      preview.value      = []
-      if (fileInput.value) fileInput.value.value = ''
-    }
-  } catch (err) {
-    errorMsg.value = err.response?.data?.error || 'Erreur lors de l\'import.'
-  } finally {
-    uploading.value = false
-  }
+    const fd = new FormData()
+    fd.append('csv', selectedFile.value)
+    fd.append('session_id', sessionId.value)
+    result.value = (await etudiantService.importCsv(fd)).data
+    selectedFile.value = null
+    if (fileInput.value) fileInput.value.value = ''
+  } catch (e) { error.value = e.response?.data?.error || 'Erreur lors de l\'import.' }
+  finally { importing.value = false }
 }
 
-onMounted(async () => {
-  const res = await sessionService.getAll()
-  sessions.value = res.data
-})
+function downloadTemplate() {
+  const csv = 'nom;prenom;email;date_naissance\nDUPONT;Marie;marie.dupont@exemple.com;2001-03-15\nMARTIN;Thomas;thomas.martin@exemple.com;2000-07-22'
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+  a.download = 'import_exemple.csv'
+  a.click()
+}
 </script>
+
+<style scoped>
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.info-card, .form-card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; }
+
+.info-card-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 16px; }
+
+.info-text { font-size: 13.5px; color: #64748B; line-height: 1.6; margin: 0 0 12px; }
+
+.code-block { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; font-size: 12px; color: #374151; line-height: 1.7; overflow-x: auto; }
+
+.download-btn { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: #F0FDF4; color: #059669; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; margin-top: 16px; font-family: 'DM Sans', sans-serif; }
+.download-btn:hover { background: #DCFCE7; }
+
+.form-field { margin-bottom: 18px; }
+.field-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.select-field { width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #0F172A; outline: none; font-family: 'DM Sans', sans-serif; }
+.select-field:focus { border-color: #2563EB; }
+
+.file-zone { border: 2px dashed #E2E8F0; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.file-zone:hover { border-color: #2563EB; background: #F8FAFF; }
+.file-zone.has-file { border-color: #059669; background: #F0FDF4; border-style: solid; text-align: left; padding: 16px 20px; }
+
+.import-btn { width: 100%; padding: 12px; background: #2563EB; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; font-family: 'DM Sans', sans-serif; margin-top: 4px; }
+.import-btn:hover:not(:disabled) { background: #1D4ED8; }
+.import-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.result-success { display: flex; align-items: center; gap: 8px; background: #F0FDF4; color: #059669; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px 16px; font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+.result-warnings { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #92400E; margin-bottom: 12px; }
+.result-error { display: flex; align-items: center; gap: 8px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; border-radius: 8px; padding: 12px 16px; font-size: 13.5px; margin-top: 12px; }
+.goto-btn { display: inline-flex; align-items: center; color: #2563EB; font-size: 13.5px; font-weight: 600; text-decoration: none; }
+.goto-btn:hover { text-decoration: underline; }
+
+.spinner-xs { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spinner-xs.white { border-color: rgba(255,255,255,0.3); border-top-color: white; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>

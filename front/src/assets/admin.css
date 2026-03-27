@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+* { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+.page { padding: 50px; max-width: 2000px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0; }
+.btn-primary { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: #2563EB; color: white; border: none; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.15s; font-family: 'DM Sans', sans-serif; }
+.btn-primary:hover { background: #1D4ED8; color: white; }
+.btn-secondary { padding: 9px 18px; background: #F1F5F9; color: #374151; border: none; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+.btn-secondary:hover { background: #E2E8F0; }
+.table-card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.6px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; }
+.data-table tbody td { padding: 14px 16px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: #374151; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: #F8FAFC; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.badge-blue { background: #EFF6FF; color: #2563EB; }
+.badge-green { background: #F0FDF4; color: #059669; }
+.badge-yellow { background: #FFFBEB; color: #D97706; }
+.badge-red { background: #FEF2F2; color: #DC2626; }
+.badge-gray { background: #F1F5F9; color: #64748B; }
+.btn-icon { width: 32px; height: 32px; border-radius: 7px; border: 1px solid #E2E8F0; background: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #64748B; transition: all 0.15s; }
+.btn-icon:hover { border-color: #2563EB; color: #2563EB; background: #EFF6FF; }
+.btn-icon.danger:hover { border-color: #DC2626; color: #DC2626; background: #FEF2F2; }
+.empty-state { padding: 48px; text-align: center; color: #94A3B8; font-size: 14px; }
+.loading-state { padding: 48px; text-align: center; }
+.spinner-sm { width: 24px; height: 24px; border: 2px solid #E2E8F0; border-top-color: #2563EB; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.alert { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: 13.5px; margin-bottom: 20px; }
+.alert-success { background: #F0FDF4; color: #059669; border: 1px solid #BBF7D0; }
+.alert-danger { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+.modal { background: white; border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #F1F5F9; }
+.modal-title { font-size: 16px; font-weight: 700; color: #0F172A; margin: 0; }
+.modal-close { background: none; border: none; cursor: pointer; color: #94A3B8; padding: 4px; border-radius: 6px; }
+.modal-close:hover { background: #F1F5F9; color: #0F172A; }
+.modal-body { padding: 24px; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid #F1F5F9; display: flex; justify-content: flex-end; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.field label { font-size: 13px; font-weight: 600; color: #374151; }
+.field input, .field select { padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #0F172A; background: white; outline: none; transition: border-color 0.15s; font-family: 'DM Sans', sans-serif; }
+.field input:focus, .field select:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
