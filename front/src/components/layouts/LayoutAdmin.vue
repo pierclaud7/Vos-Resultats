@@ -66,13 +66,13 @@
       </div>
     </aside>
 
-    <!-- Bouton toggle -->
+    <!-- Toggle -->
     <button class="toggle-btn" @click="sidebarOpen = !sidebarOpen">
       <svg v-if="sidebarOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
       <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
     </button>
 
-    <!-- Contenu principal -->
+    <!-- Contenu -->
     <main class="main-content">
       <slot />
     </main>
@@ -87,7 +87,6 @@ import { useRouter } from 'vue-router'
 const auth        = useAuthStore()
 const router      = useRouter()
 const sidebarOpen = ref(true)
-
 const userInitial = computed(() => auth.user?.email?.[0]?.toUpperCase() || 'A')
 
 async function handleLogout() {
@@ -103,14 +102,13 @@ async function handleLogout() {
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background: #F1F5F9;
+  background: #0F172A;
 }
 
-/* ── Sidebar ── */
 .sidebar {
   width: 240px;
   min-width: 240px;
-  background: #0F172A;
+  background: #080F1E;
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -121,9 +119,9 @@ async function handleLogout() {
   overflow-x: hidden;
   z-index: 100;
   transition: width 0.25s ease, min-width 0.25s ease;
+  border-right: 1px solid rgba(255,255,255,0.04);
 }
 
-/* Sidebar réduite */
 .app-shell.collapsed .sidebar {
   width: 60px;
   min-width: 60px;
@@ -134,7 +132,7 @@ async function handleLogout() {
   align-items: center;
   gap: 10px;
   padding: 20px 12px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   overflow: hidden;
   white-space: nowrap;
 }
@@ -151,17 +149,18 @@ async function handleLogout() {
   flex-shrink: 0;
 }
 
-.brand-name { color: white; font-weight: 600; font-size: 15px; }
+.brand-name { color: white; font-weight: 700; font-size: 15px; }
 
 .sidebar-section-label {
-  color: #475569;
+  color: #1E293B;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   padding: 20px 16px 6px;
   white-space: nowrap;
   overflow: hidden;
+  color: #334155;
 }
 
 .sidebar-nav { padding: 0 8px; }
@@ -172,7 +171,7 @@ async function handleLogout() {
   gap: 10px;
   padding: 9px 10px;
   border-radius: 8px;
-  color: #94A3B8;
+  color: #475569;
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
@@ -182,14 +181,13 @@ async function handleLogout() {
   overflow: hidden;
 }
 
-.nav-item:hover { background: rgba(255,255,255,0.06); color: #E2E8F0; }
-.nav-item.active { background: #1E3A8A; color: white; }
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #94A3B8; }
+.nav-item.active { background: rgba(37,99,235,0.15); color: #60A5FA; }
 
-/* ── Footer ── */
 .sidebar-footer {
   margin-top: auto;
   padding: 16px 8px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.04);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -210,12 +208,13 @@ async function handleLogout() {
   width: 100%;
   white-space: nowrap;
   overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
 }
 
-.footer-btn.secondary { background: rgba(255,255,255,0.06); color: #94A3B8; }
-.footer-btn.secondary:hover { background: rgba(255,255,255,0.1); color: #E2E8F0; }
-.footer-btn.danger { background: rgba(239,68,68,0.1); color: #F87171; }
-.footer-btn.danger:hover { background: rgba(239,68,68,0.2); }
+.footer-btn.secondary { background: rgba(255,255,255,0.04); color: #475569; }
+.footer-btn.secondary:hover { background: rgba(255,255,255,0.07); color: #94A3B8; }
+.footer-btn.danger { background: rgba(239,68,68,0.08); color: #64748B; }
+.footer-btn.danger:hover { background: rgba(239,68,68,0.15); color: #EF4444; }
 
 .user-info {
   display: flex;
@@ -227,12 +226,12 @@ async function handleLogout() {
 .user-avatar {
   width: 28px;
   height: 28px;
-  background: #2563EB;
+  background: #1E3A8A;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #60A5FA;
   font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
@@ -241,14 +240,13 @@ async function handleLogout() {
 .user-avatar.solo { margin: 4px auto 0; }
 
 .user-email {
-  color: #64748B;
+  color: #334155;
   font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ── Bouton toggle ── */
 .toggle-btn {
   position: fixed;
   top: 20px;
@@ -256,33 +254,29 @@ async function handleLogout() {
   width: 24px;
   height: 24px;
   background: #1E293B;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94A3B8;
+  color: #475569;
   z-index: 200;
   transition: left 0.25s ease;
 }
 
 .toggle-btn:hover { background: #334155; color: white; }
 
-.app-shell.collapsed .toggle-btn {
-  left: 48px;
-}
+.app-shell.collapsed .toggle-btn { left: 48px; }
 
-/* ── Main ── */
 .main-content {
   flex: 1;
   margin-left: 240px;
   min-height: 100vh;
+  background: #0F172A;
   overflow-x: hidden;
   transition: margin-left 0.25s ease;
 }
 
-.app-shell.collapsed .main-content {
-  margin-left: 60px;
-}
+.app-shell.collapsed .main-content { margin-left: 60px; }
 </style>

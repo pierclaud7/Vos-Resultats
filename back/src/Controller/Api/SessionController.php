@@ -36,8 +36,7 @@ class SessionController extends AbstractController
     #[Route('', name: 'api_session_index', methods: ['GET'])]
     public function index(SessionRepository $repo): JsonResponse
     {
-        $sessions = $repo->findAll();
-        return $this->json(array_map([$this, 'serializeSession'], $sessions));
+        return $this->json(array_map([$this, 'serializeSession'], $repo->findAll()));
     }
 
     #[Route('/{id}', name: 'api_session_show', methods: ['GET'])]
@@ -86,54 +85,40 @@ class SessionController extends AbstractController
         if (isset($data['annee'])) {
             $session->setAnnee((int) $data['annee']);
         }
-        if (isset($data['diplome_id'])) {
+        if (!empty($data['diplome_id'])) {
             $diplome = $diplomeRepo->find($data['diplome_id']);
-            if ($diplome) {
-                $session->setDiplome($diplome);
-            }
+            if ($diplome) $session->setDiplome($diplome);
         }
 
         $em->flush();
-
         return $this->json($this->serializeSession($session));
     }
 
-    /**
-     * Étape 1 : Valider une session
-     * → Calcule automatiquement le taux de réussite
-     * → Passe le statut à "Validé"
-     */
     #[Route('/{id}/valider', name: 'api_session_valider', methods: ['POST'])]
     public function valider(Session $session, EntityManagerInterface $em): JsonResponse
     {
-        if ($session->getStatut() === 'Publié') {
-            return $this->json(['error' => 'Session déjà publiée, impossible de revalider.'], 409);
-        }
-
         $etudiants = $session->getEtudiants();
-        $total = $etudiants->count();
+        $total     = $etudiants->count();
 
         if ($total === 0) {
             return $this->json(['error' => 'Aucun étudiant dans cette session.'], 422);
         }
 
-        // Calcul automatique du taux de réussite
         $nbAdmis = 0;
         foreach ($etudiants as $etudiant) {
-            if ($etudiant->isEstAdmis()) {
+            if ($etudiant->getResultat() === 'Admis') {
                 $nbAdmis++;
             }
         }
 
         $taux = round(($nbAdmis / $total) * 100, 2);
-
         $session->setTauxReussite($taux);
         $session->setStatut('Validé');
         $em->flush();
 
         return $this->json([
             'success'      => true,
-            'message'      => 'Session validée avec succès.',
+            'message'      => 'Session validée.',
             'tauxReussite' => $taux,
             'nbAdmis'      => $nbAdmis,
             'total'        => $total,
@@ -141,18 +126,11 @@ class SessionController extends AbstractController
         ]);
     }
 
-    /**
-     * Étape 2 : Publier une session
-     * → La rend visible sur le site public
-     * → Passe le statut à "Publié"
-     */
     #[Route('/{id}/publier', name: 'api_session_publier', methods: ['POST'])]
     public function publier(Session $session, EntityManagerInterface $em): JsonResponse
     {
         if ($session->getStatut() !== 'Validé') {
-            return $this->json([
-                'error' => 'La session doit d\'abord être validée avant d\'être publiée.',
-            ], 409);
+            return $this->json(['error' => 'La session doit être validée avant publication.'], 409);
         }
 
         $session->setStatut('Publié');
@@ -160,7 +138,7 @@ class SessionController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'message' => 'Session publiée avec succès. Les résultats sont maintenant visibles publiquement.',
+            'message' => 'Session publiée.',
             'session' => $this->serializeSession($session),
         ]);
     }

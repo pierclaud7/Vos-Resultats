@@ -26,12 +26,6 @@ security:
             logout:
                 path: /api/auth/logout
 
-        main:
-            lazy: true
-            provider: app_user_provider
-            logout:
-                path: /api/auth/logout
-
     access_control:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/public, roles: PUBLIC_ACCESS }

@@ -1,6 +1,5 @@
 <template>
   <div class="page">
-    <!-- Top bar -->
     <div class="topbar">
       <div>
         <h1 class="page-title">Tableau de bord</h1>
@@ -12,7 +11,6 @@
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card" v-for="stat in stats" :key="stat.label">
         <div class="stat-icon" :style="{ background: stat.bg }">
@@ -28,11 +26,10 @@
       </div>
     </div>
 
-    <!-- Actions rapides -->
     <div class="grid-2">
-      <div class="card">
-        <div class="card-head">
-          <h3 class="card-title">Gestion des examens</h3>
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Gestion des examens</h3>
         </div>
         <div class="action-list">
           <router-link to="/admin/sessions" class="action-item">
@@ -48,7 +45,7 @@
 
           <router-link to="/admin/etudiants" class="action-item">
             <div class="action-icon green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
             <div class="action-body">
               <div class="action-title">Étudiants & Résultats</div>
@@ -70,9 +67,9 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-head">
-          <h3 class="card-title">Configuration</h3>
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h3 class="dash-card-title">Configuration</h3>
         </div>
         <div class="config-list">
           <router-link to="/admin/filieres" class="config-item">
@@ -98,10 +95,10 @@ const auth    = useAuthStore()
 const loading = ref(true)
 
 const stats = ref([
-  { label: 'Filières',  value: 0, bg: '#EFF6FF', svg: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>' },
-  { label: 'Diplômes',  value: 0, bg: '#F0FDF4', svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
-  { label: 'Sessions',  value: 0, bg: '#FFFBEB', svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-  { label: 'Étudiants', value: 0, bg: '#FFF1F2', svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' },
+  { label: 'Filières',  value: 0, bg: 'rgba(37,99,235,0.12)',   svg: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>' },
+  { label: 'Diplômes',  value: 0, bg: 'rgba(5,150,105,0.12)',   svg: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
+  { label: 'Sessions',  value: 0, bg: 'rgba(217,119,6,0.12)',   svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+  { label: 'Étudiants', value: 0, bg: 'rgba(124,58,237,0.12)',  svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' },
 ])
 
 onMounted(async () => {
@@ -122,19 +119,14 @@ onMounted(async () => {
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
 
-.page { padding: 50px; max-width: 2000px; }
+.page-sub { font-size: 13.5px; color: #475569; margin: 4px 0 0; }
+.topbar-date { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #334155; background: #1E293B; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); }
 
-.topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
-.page-title { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0 0 4px; }
-.page-sub { font-size: 13.5px; color: #64748B; margin: 0; }
-.topbar-date { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #94A3B8; background: white; padding: 8px 14px; border-radius: 8px; border: 1px solid #E2E8F0; }
-
-/* ── Stats ── */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 
 .stat-card {
-  background: white;
-  border: 1px solid #E2E8F0;
+  background: #1E293B;
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -149,36 +141,32 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0F172A;
+  color: white;
   flex-shrink: 0;
 }
 
-.stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1; margin-bottom: 4px; }
-.stat-label { font-size: 12.5px; color: #64748B; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
-.skeleton-val { display: block; width: 40px; height: 26px; background: #F1F5F9; border-radius: 6px; animation: pulse 1.5s infinite; }
+.stat-value { font-size: 26px; font-weight: 700; color: white; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 12px; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.skeleton-val { display: block; width: 40px; height: 26px; background: rgba(255,255,255,0.06); border-radius: 6px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
 
-@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.5 } }
-
-/* ── Grid ── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-.card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
-.card-head { padding: 20px 20px 0; }
-.card-title { font-size: 14px; font-weight: 700; color: #0F172A; margin: 0 0 16px; }
+.dash-card { background: #1E293B; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; }
+.dash-card-head { padding: 20px 20px 0; }
+.dash-card-title { font-size: 14px; font-weight: 700; color: white; margin: 0 0 16px; }
 
-/* ── Actions ── */
 .action-list { display: flex; flex-direction: column; }
-
 .action-item {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 16px 20px;
   text-decoration: none;
-  border-top: 1px solid #F1F5F9;
+  border-top: 1px solid rgba(255,255,255,0.04);
   transition: background 0.15s;
 }
-.action-item:hover { background: #F8FAFC; }
+.action-item:hover { background: rgba(255,255,255,0.03); }
 
 .action-icon {
   width: 38px;
@@ -189,28 +177,28 @@ onMounted(async () => {
   justify-content: center;
   flex-shrink: 0;
 }
-.action-icon.yellow { background: #FFFBEB; color: #D97706; }
-.action-icon.green  { background: #F0FDF4; color: #059669; }
-.action-icon.blue   { background: #EFF6FF; color: #2563EB; }
+.action-icon.yellow { background: rgba(217,119,6,0.12); color: #F59E0B; }
+.action-icon.green  { background: rgba(5,150,105,0.12); color: #10B981; }
+.action-icon.blue   { background: rgba(37,99,235,0.12); color: #60A5FA; }
 
-.action-title { font-size: 14px; font-weight: 600; color: #0F172A; margin-bottom: 2px; }
-.action-sub   { font-size: 12.5px; color: #94A3B8; }
-.action-arrow { color: #CBD5E1; margin-left: auto; flex-shrink: 0; }
+.action-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 2px; }
+.action-sub   { font-size: 12.5px; color: #334155; }
+.action-arrow { color: #1E293B; margin-left: auto; flex-shrink: 0; }
+.action-item:hover .action-arrow { color: #334155; }
 
-/* ── Config ── */
 .config-list { display: flex; flex-direction: column; padding: 0 20px 20px; gap: 8px; }
 .config-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
   text-decoration: none;
-  color: #374151;
+  color: #64748B;
   font-size: 14px;
   font-weight: 500;
   transition: all 0.15s;
 }
-.config-item:hover { border-color: #2563EB; color: #2563EB; background: #EFF6FF; }
+.config-item:hover { border-color: rgba(37,99,235,0.3); color: #60A5FA; background: rgba(37,99,235,0.05); }
 </style>
