@@ -16,27 +16,14 @@ class EtudiantController extends AbstractController
 {
     private function serialize(Etudiant $e): array
     {
-        $resultat = 'En attente';
-        if ($e->isEstAdmis()) {
-            $resultat = 'Admis';
-        } elseif ($e->getMoyenne() !== null) {
-            $resultat = match(true) {
-                $e->getMoyenne() >= 10 => 'Admis',
-                $e->getMoyenne() >= 8  => 'Rattrapage',
-                default                => 'Refusé',
-            };
-        }
-
         return [
             'id'             => $e->getId(),
             'numeroEtudiant' => $e->getNumeroEtudiant(),
             'nom'            => $e->getNom(),
             'prenom'         => $e->getPrenom(),
             'email'          => $e->getEmail(),
-            'dateNaissance'  => $e->getDateNaissance()?->format('Y-m-d'),
             'moyenne'        => $e->getMoyenne(),
-            'estAdmis'       => $e->isEstAdmis(),
-            'resultat'       => $resultat,
+            'resultat'       => $e->getResultat() ?? 'En attente',
             'session'        => $e->getSession() ? [
                 'id'     => $e->getSession()->getId(),
                 'annee'  => $e->getSession()->getAnnee(),
@@ -49,7 +36,10 @@ class EtudiantController extends AbstractController
         ];
     }
 
-    /** Génère un numéro étudiant unique ex: 2025-INFO-00042 */
+    /**
+     * Génère un numéro étudiant unique.
+     * Format : ANNEE-ABCD-00042
+     */
     private function generateNumero(Etudiant $e, EntityManagerInterface $em): string
     {
         $annee   = $e->getSession()?->getAnnee() ?? (int) date('Y');
@@ -105,25 +95,13 @@ class EtudiantController extends AbstractController
         $etudiant->setPrenom(trim($data['prenom']));
         $etudiant->setEmail(trim($data['email']));
         $etudiant->setSession($session);
-
-        $numero = !empty($data['numeroEtudiant'])
-            ? trim($data['numeroEtudiant'])
-            : $this->generateNumero($etudiant, $em);
-
-        if ($em->getRepository(Etudiant::class)->findOneBy(['numeroEtudiant' => $numero])) {
-            return $this->json(['error' => "Le numéro étudiant '$numero' est déjà utilisé."], 409);
-        }
-
-        $etudiant->setNumeroEtudiant($numero);
+        $etudiant->setNumeroEtudiant($this->generateNumero($etudiant, $em));
 
         if (isset($data['moyenne']) && $data['moyenne'] !== '') {
             $etudiant->setMoyenne((float) $data['moyenne']);
         }
-        if (isset($data['estAdmis'])) {
-            $etudiant->setEstAdmis((bool) $data['estAdmis']);
-        }
-        if (!empty($data['dateNaissance'])) {
-            $etudiant->setDateNaissance(new \DateTime($data['dateNaissance']));
+        if (!empty($data['resultat'])) {
+            $etudiant->setResultat($data['resultat']);
         }
 
         $em->persist($etudiant);
@@ -150,13 +128,14 @@ class EtudiantController extends AbstractController
             if ($s) $etudiant->setSession($s);
         }
         if (array_key_exists('moyenne', $data)) {
-            $etudiant->setMoyenne($data['moyenne'] !== null && $data['moyenne'] !== '' ? (float) $data['moyenne'] : null);
+            $etudiant->setMoyenne(
+                $data['moyenne'] !== null && $data['moyenne'] !== ''
+                    ? (float) $data['moyenne']
+                    : null
+            );
         }
-        if (isset($data['estAdmis'])) {
-            $etudiant->setEstAdmis((bool) $data['estAdmis']);
-        }
-        if (isset($data['dateNaissance']) && $data['dateNaissance']) {
-            $etudiant->setDateNaissance(new \DateTime($data['dateNaissance']));
+        if (array_key_exists('resultat', $data)) {
+            $etudiant->setResultat(!empty($data['resultat']) ? $data['resultat'] : null);
         }
 
         $em->flush();
@@ -176,9 +155,9 @@ class EtudiantController extends AbstractController
      *   nom;prenom;email;date_naissance
      *   DUPONT;Jean;jean@test.com;2000-05-12
      *
-     * POST multipart/form-data avec :
-     *   - csv      : le fichier .csv
-     *   - session_id : l'ID de la session cible
+     * POST multipart/form-data :
+     *   - csv        : fichier .csv
+     *   - session_id : ID de la session cible
      */
     #[Route('/import/csv', name: 'api_etudiant_import_csv', methods: ['POST'])]
     public function importCsv(
@@ -240,7 +219,9 @@ class EtudiantController extends AbstractController
 
             $dateStr = $data['datenaissance'] ?? $data['daten'] ?? $row[3] ?? '';
             if (!empty($dateStr)) {
-                try { $etudiant->setDateNaissance(new \DateTime($dateStr)); } catch (\Exception) {}
+                try {
+                    $etudiant->setDateNaissance(new \DateTime($dateStr));
+                } catch (\Exception) {}
             }
 
             $em->persist($etudiant);

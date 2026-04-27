@@ -16,7 +16,7 @@ class Filiere
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nom = null; // <-- VOICI CE QU'IL MANQUAIT !
+    private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'filiere', targetEntity: Diplome::class)]
     private Collection $diplomes;
@@ -31,7 +31,7 @@ class Filiere
         return $this->id;
     }
 
-    public function getNom(): ?string // <-- ET LE GETTER INDISPENSABLE
+    public function getNom(): ?string
     {
         return $this->nom;
     }

@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/filieres')]
 class FiliereController extends AbstractController
@@ -17,13 +16,11 @@ class FiliereController extends AbstractController
     #[Route('', name: 'api_filiere_index', methods: ['GET'])]
     public function index(FiliereRepository $repo): JsonResponse
     {
-        $filieres = $repo->findAll();
-
         $data = array_map(fn(Filiere $f) => [
-            'id'           => $f->getId(),
-            'nom'          => $f->getNom(),
-            'nbDiplomes'   => $f->getDiplomes()->count(),
-        ], $filieres);
+            'id'         => $f->getId(),
+            'nom'        => $f->getNom(),
+            'nbDiplomes' => $f->getDiplomes()->count(),
+        ], $repo->findAll());
 
         return $this->json($data);
     }
@@ -32,8 +29,8 @@ class FiliereController extends AbstractController
     public function show(Filiere $filiere): JsonResponse
     {
         return $this->json([
-            'id'  => $filiere->getId(),
-            'nom' => $filiere->getNom(),
+            'id'       => $filiere->getId(),
+            'nom'      => $filiere->getNom(),
             'diplomes' => $filiere->getDiplomes()->map(fn($d) => [
                 'id'       => $d->getId(),
                 'intitule' => $d->getIntitule(),
